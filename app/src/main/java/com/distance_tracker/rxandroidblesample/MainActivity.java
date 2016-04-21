@@ -42,27 +42,25 @@ public class MainActivity extends AppCompatActivity {
                 rxBleDevice.observeConnectionStateChanges().subscribe(connectionStateSubscription);
                 rxBleDevice.establishConnection(MainActivity.this, true)
                         .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(connectionSubscriber);
+                        .subscribe(new Subscriber<RxBleConnection>() {
+                            @Override
+                            public void onCompleted() {
+                                showString("connection onCompleted");
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                showString("connection onError: " + e.getMessage());
+                            }
+
+                            @Override
+                            public void onNext(RxBleConnection rxBleConnection) {
+                                showString("connection established");
+                            }
+                        });
             }
         });
     }
-
-    private Subscriber<RxBleConnection> connectionSubscriber = new Subscriber<RxBleConnection>() {
-        @Override
-        public void onCompleted() {
-            showString("connection onCompleted");
-        }
-
-        @Override
-        public void onError(Throwable e) {
-            showString("connection onError: " + e.getMessage());
-        }
-
-        @Override
-        public void onNext(RxBleConnection rxBleConnection) {
-            showString("connection established");
-        }
-    };
 
     private Observer<RxBleConnection.RxBleConnectionState> connectionStateSubscription = new Observer<RxBleConnection.RxBleConnectionState>() {
         @Override
